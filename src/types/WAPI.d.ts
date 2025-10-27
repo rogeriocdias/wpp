@@ -59,11 +59,7 @@ interface WAPI {
     includeNotifications: boolean
   ) => Message[];
   getAllNewMessages: () => Message[];
-  getAllUnreadMessages: (options?: {
-    onlyUsers?: boolean;
-    onlyGroups?: boolean;
-    limit?: number;
-  }) => PartialMessage[];
+  getAllUnreadMessages: () => PartialMessage[];
   getBatteryLevel: () => number;
   getBusinessProfilesProducts: (to: string) => any;
   getOrderbyMsg: (messageId: string) => any;
