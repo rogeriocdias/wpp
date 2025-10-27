@@ -59,7 +59,11 @@ interface WAPI {
     includeNotifications: boolean
   ) => Message[];
   getAllNewMessages: () => Message[];
-  getAllUnreadMessages: () => PartialMessage[];
+  getAllUnreadMessages: (options?: {
+    onlyUsers?: boolean;
+    onlyGroups?: boolean;
+    limit?: number;
+  }) => Promise<PartialMessage[]>;
   getBatteryLevel: () => number;
   getBusinessProfilesProducts: (to: string) => any;
   getOrderbyMsg: (messageId: string) => any;
@@ -82,6 +86,11 @@ interface WAPI {
     includeNotifications: boolean,
     useUnreadCount: boolean
   ) => any;
+  getUnreadMessagesInChat: (
+    chatId: string,
+    includeMe?: boolean,
+    includeNotifications?: boolean
+  ) => PartialMessage[];
   getWAVersion: () => string;
   isConnected: () => boolean;
   isLoggedIn: () => boolean;

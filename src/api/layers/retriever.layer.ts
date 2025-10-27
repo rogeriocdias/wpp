@@ -27,7 +27,6 @@ import {
   ProfilePicThumbObj,
   WhatsappProfile,
   Wid,
-  PartialMessage,
 } from '../model';
 import { SenderLayer } from './sender.layer';
 import { ChatListOptions } from '@wppconnect/wa-js/dist/chat';
