@@ -16,6 +16,9 @@
  */
 
 export function initNewMessagesListener() {
+  const CIPHERTEXT_RETRY_DELAY = 500;
+  const CIPHERTEXT_MAX_RETRIES = 20;
+
   window.WAPI._newMessagesListener = WPP.whatsapp.MsgStore.on(
     'add',
     (newMessage) => {
@@ -25,54 +28,111 @@ export function initNewMessagesListener() {
         !newMessage.isSentByMe &&
         !newMessage.isStatusV3
       ) {
-        setTimeout(
-          () => {
-            let message = window.WAPI.processMessageObj(
-              newMessage,
-              false,
-              false
+        let hasQueued = false;
+
+        const deliverMessage = (message) => {
+          if (!message || hasQueued) {
+            return;
+          }
+
+          hasQueued = true;
+          window.WAPI._newMessagesQueue.push(message);
+          window.WAPI._newMessagesBuffer.push(message);
+
+          // Starts debouncer time to don't call a callback for each message if more than one message arrives
+          // in the same second
+          if (
+            !window.WAPI._newMessagesDebouncer &&
+            window.WAPI._newMessagesQueue.length > 0
+          ) {
+            window.WAPI._newMessagesDebouncer = setTimeout(() => {
+              let queuedMessages = window.WAPI._newMessagesQueue;
+
+              window.WAPI._newMessagesDebouncer = null;
+              window.WAPI._newMessagesQueue = [];
+
+              let removeCallbacks = [];
+
+              window.WAPI._newMessagesCallbacks.forEach(function (callbackObj) {
+                if (callbackObj.callback !== undefined) {
+                  callbackObj.callback(queuedMessages);
+                }
+                if (callbackObj.rmAfterUse === true) {
+                  removeCallbacks.push(callbackObj);
+                }
+              });
+
+              // Remove removable callbacks.
+              removeCallbacks.forEach(function (rmCallbackObj) {
+                let callbackIndex =
+                  window.WAPI._newMessagesCallbacks.indexOf(rmCallbackObj);
+                window.WAPI._newMessagesCallbacks.splice(callbackIndex, 1);
+              });
+            }, 1000);
+          }
+        };
+
+        const queueFromStore = (attempt = 0) => {
+          if (hasQueued) {
+            return;
+          }
+
+          let serialized = window.WAPI.processMessageObj(
+            newMessage,
+            false,
+            false
+          );
+
+          if (!serialized) {
+            if (attempt < CIPHERTEXT_MAX_RETRIES) {
+              setTimeout(
+                () => queueFromStore(attempt + 1),
+                CIPHERTEXT_RETRY_DELAY
+              );
+            }
+            return;
+          }
+
+          if (
+            serialized.type === 'ciphertext' &&
+            attempt < CIPHERTEXT_MAX_RETRIES
+          ) {
+            setTimeout(
+              () => queueFromStore(attempt + 1),
+              CIPHERTEXT_RETRY_DELAY
             );
-            if (message) {
-              window.WAPI._newMessagesQueue.push(message);
-              window.WAPI._newMessagesBuffer.push(message);
-            }
+            return;
+          }
 
-            // Starts debouncer time to don't call a callback for each message if more than one message arrives
-            // in the same second
+          deliverMessage(serialized);
+        };
+
+        const scheduleInitialAttempt = (delay) => {
+          setTimeout(() => queueFromStore(), delay);
+        };
+
+        if (
+          newMessage.type === 'ciphertext' &&
+          typeof newMessage.onCiphertextDecrypted === 'function'
+        ) {
+          try {
+            let decryptedPromise = newMessage.onCiphertextDecrypted();
             if (
-              !window.WAPI._newMessagesDebouncer &&
-              window.WAPI._newMessagesQueue.length > 0
+              decryptedPromise &&
+              typeof decryptedPromise.then === 'function'
             ) {
-              window.WAPI._newMessagesDebouncer = setTimeout(() => {
-                let queuedMessages = window.WAPI._newMessagesQueue;
-
-                window.WAPI._newMessagesDebouncer = null;
-                window.WAPI._newMessagesQueue = [];
-
-                let removeCallbacks = [];
-
-                window.WAPI._newMessagesCallbacks.forEach(function (
-                  callbackObj
-                ) {
-                  if (callbackObj.callback !== undefined) {
-                    callbackObj.callback(queuedMessages);
-                  }
-                  if (callbackObj.rmAfterUse === true) {
-                    removeCallbacks.push(callbackObj);
-                  }
-                });
-
-                // Remove removable callbacks.
-                removeCallbacks.forEach(function (rmCallbackObj) {
-                  let callbackIndex =
-                    window.WAPI._newMessagesCallbacks.indexOf(rmCallbackObj);
-                  window.WAPI._newMessagesCallbacks.splice(callbackIndex, 1);
-                });
-              }, 1000);
+              decryptedPromise
+                .then(() => queueFromStore())
+                .catch(() => queueFromStore());
             }
-          },
-          newMessage.body ? 0 : 2000
-        );
+          } catch (error) {
+            queueFromStore();
+          }
+
+          scheduleInitialAttempt(CIPHERTEXT_RETRY_DELAY);
+        } else {
+          scheduleInitialAttempt(newMessage.body ? 0 : 2000);
+        }
       }
     }
   );
