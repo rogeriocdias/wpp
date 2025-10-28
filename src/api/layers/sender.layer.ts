@@ -360,10 +360,46 @@ export class SenderLayer extends ListenerLayer {
           mentionedList: mentionedList,
         });
 
+        const rawId = result?.id as any;
+        const serializedId =
+          (rawId && rawId._serialized) ||
+          (rawId && rawId.toString ? rawId.toString() : rawId ?? null);
+        let sendMsgResult;
+        try {
+          sendMsgResult = await result.sendMsgResult;
+          if (sendMsgResult && typeof sendMsgResult === 'object') {
+            try {
+              sendMsgResult = JSON.parse(JSON.stringify(sendMsgResult));
+            } catch (cloneError) {
+              sendMsgResult = {
+                value: `${sendMsgResult}`,
+                serializationError: `${cloneError}`,
+              };
+            }
+          }
+        } catch (error) {
+          let serializedError = error;
+          if (error && typeof error === 'object') {
+            try {
+              serializedError = JSON.parse(
+                JSON.stringify(error, Object.getOwnPropertyNames(error))
+              );
+            } catch (stringifyError) {
+              serializedError = {
+                message: error instanceof Error ? error.message : `${error}`,
+                serializeError: `${stringifyError}`,
+              };
+            }
+          }
+          sendMsgResult = {
+            error: serializedError,
+          };
+        }
+
         return {
-          ack: result.ack,
-          id: result.id,
-          sendMsgResult: await result.sendMsgResult,
+          ack: result?.ack ?? null,
+          id: serializedId,
+          sendMsgResult,
         };
       },
       {
@@ -540,10 +576,46 @@ export class SenderLayer extends ListenerLayer {
           messageId: messageId,
         });
 
+        const rawId = result?.id as any;
+        const serializedId =
+          (rawId && rawId._serialized) ||
+          (rawId && rawId.toString ? rawId.toString() : rawId ?? null);
+        let sendMsgResult;
+        try {
+          sendMsgResult = await result.sendMsgResult;
+          if (sendMsgResult && typeof sendMsgResult === 'object') {
+            try {
+              sendMsgResult = JSON.parse(JSON.stringify(sendMsgResult));
+            } catch (cloneError) {
+              sendMsgResult = {
+                value: `${sendMsgResult}`,
+                serializationError: `${cloneError}`,
+              };
+            }
+          }
+        } catch (error) {
+          let serializedError = error;
+          if (error && typeof error === 'object') {
+            try {
+              serializedError = JSON.parse(
+                JSON.stringify(error, Object.getOwnPropertyNames(error))
+              );
+            } catch (stringifyError) {
+              serializedError = {
+                message: error instanceof Error ? error.message : `${error}`,
+                serializeError: `${stringifyError}`,
+              };
+            }
+          }
+          sendMsgResult = {
+            error: serializedError,
+          };
+        }
+
         return {
-          ack: result.ack,
-          id: result.id,
-          sendMsgResult: await result.sendMsgResult,
+          ack: result?.ack ?? null,
+          id: serializedId,
+          sendMsgResult,
         };
       },
       { to, base64, filename, caption, quotedMessageId, messageId }
@@ -741,10 +813,46 @@ export class SenderLayer extends ListenerLayer {
       this.page,
       async ({ to, base64, options }) => {
         const result = await WPP.chat.sendFileMessage(to, base64, options);
+        const rawId = result?.id as any;
+        const serializedId =
+          (rawId && rawId._serialized) ||
+          (rawId && rawId.toString ? rawId.toString() : rawId ?? null);
+        let sendMsgResult;
+        try {
+          sendMsgResult = await result.sendMsgResult;
+          if (sendMsgResult && typeof sendMsgResult === 'object') {
+            try {
+              sendMsgResult = JSON.parse(JSON.stringify(sendMsgResult));
+            } catch (cloneError) {
+              sendMsgResult = {
+                value: `${sendMsgResult}`,
+                serializationError: `${cloneError}`,
+              };
+            }
+          }
+        } catch (error) {
+          let serializedError = error;
+          if (error && typeof error === 'object') {
+            try {
+              serializedError = JSON.parse(
+                JSON.stringify(error, Object.getOwnPropertyNames(error))
+              );
+            } catch (stringifyError) {
+              serializedError = {
+                message: error instanceof Error ? error.message : `${error}`,
+                serializeError: `${stringifyError}`,
+              };
+            }
+          }
+          sendMsgResult = {
+            error: serializedError,
+          };
+        }
+
         return {
-          ack: result.ack,
-          id: result.id,
-          sendMsgResult: await result.sendMsgResult,
+          ack: result?.ack ?? null,
+          id: serializedId,
+          sendMsgResult,
         };
       },
       { to, base64, options: options as any }
@@ -815,10 +923,46 @@ export class SenderLayer extends ListenerLayer {
           waitForAck: true,
         });
 
+        const rawId = result?.id as any;
+        const serializedId =
+          (rawId && rawId._serialized) ||
+          (rawId && rawId.toString ? rawId.toString() : rawId ?? null);
+        let sendMsgResult;
+        try {
+          sendMsgResult = await result.sendMsgResult;
+          if (sendMsgResult && typeof sendMsgResult === 'object') {
+            try {
+              sendMsgResult = JSON.parse(JSON.stringify(sendMsgResult));
+            } catch (cloneError) {
+              sendMsgResult = {
+                value: `${sendMsgResult}`,
+                serializationError: `${cloneError}`,
+              };
+            }
+          }
+        } catch (error) {
+          let serializedError = error;
+          if (error && typeof error === 'object') {
+            try {
+              serializedError = JSON.parse(
+                JSON.stringify(error, Object.getOwnPropertyNames(error))
+              );
+            } catch (stringifyError) {
+              serializedError = {
+                message: error instanceof Error ? error.message : `${error}`,
+                serializeError: `${stringifyError}`,
+              };
+            }
+          }
+          sendMsgResult = {
+            error: serializedError,
+          };
+        }
+
         return {
-          ack: result.ack,
-          id: result.id,
-          sendMsgResult: await result.sendMsgResult,
+          ack: result?.ack ?? null,
+          id: serializedId,
+          sendMsgResult,
         };
       },
       { to, base64, filename, caption, quotedMessageId }
@@ -1169,11 +1313,46 @@ export class SenderLayer extends ListenerLayer {
       this.page,
       async ({ to, options }) => {
         const result = await WPP.chat.sendLocationMessage(to, options);
+        const rawId = result?.id as any;
+        const serializedId =
+          (rawId && rawId._serialized) ||
+          (rawId && rawId.toString ? rawId.toString() : rawId ?? null);
+        let sendMsgResult;
+        try {
+          sendMsgResult = await result.sendMsgResult;
+          if (sendMsgResult && typeof sendMsgResult === 'object') {
+            try {
+              sendMsgResult = JSON.parse(JSON.stringify(sendMsgResult));
+            } catch (cloneError) {
+              sendMsgResult = {
+                value: `${sendMsgResult}`,
+                serializationError: `${cloneError}`,
+              };
+            }
+          }
+        } catch (error) {
+          let serializedError = error;
+          if (error && typeof error === 'object') {
+            try {
+              serializedError = JSON.parse(
+                JSON.stringify(error, Object.getOwnPropertyNames(error))
+              );
+            } catch (stringifyError) {
+              serializedError = {
+                message: error instanceof Error ? error.message : `${error}`,
+                serializeError: `${stringifyError}`,
+              };
+            }
+          }
+          sendMsgResult = {
+            error: serializedError,
+          };
+        }
 
         return {
-          ack: result.ack,
-          id: result.id,
-          sendMsgResult: await result.sendMsgResult,
+          ack: result?.ack ?? null,
+          id: serializedId,
+          sendMsgResult,
         };
       },
       { to, options: options as any }
