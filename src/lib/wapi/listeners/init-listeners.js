@@ -93,14 +93,17 @@ export function initNewMessagesListener() {
             return;
           }
 
-          if (
-            serialized.type === 'ciphertext' &&
-            attempt < CIPHERTEXT_MAX_RETRIES
-          ) {
-            setTimeout(
-              () => queueFromStore(attempt + 1),
-              CIPHERTEXT_RETRY_DELAY
-            );
+          if (serialized.type === 'ciphertext') {
+            if (attempt < CIPHERTEXT_MAX_RETRIES) {
+              setTimeout(
+                () => queueFromStore(attempt + 1),
+                CIPHERTEXT_RETRY_DELAY
+              );
+              return;
+            }
+
+            // Fallback: deliver ciphertext after exhausting retries to preserve previous behaviour.
+            deliverMessage(serialized);
             return;
           }
 
