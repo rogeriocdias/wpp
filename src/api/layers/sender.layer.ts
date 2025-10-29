@@ -565,7 +565,15 @@ export class SenderLayer extends ListenerLayer {
   ) {
     const result = await evaluateAndReturn(
       this.page,
-      async ({ to, base64, filename, caption, quotedMessageId, messageId }) => {
+      async ({
+        to,
+        base64,
+        filename,
+        caption,
+        quotedMessageId,
+        messageId,
+        isPtt,
+      }) => {
         const result = await WPP.chat.sendFileMessage(to, base64, {
           type: 'audio',
           isPtt: isPtt,
@@ -618,7 +626,7 @@ export class SenderLayer extends ListenerLayer {
           sendMsgResult,
         };
       },
-      { to, base64, filename, caption, quotedMessageId, messageId }
+      { to, base64, filename, caption, quotedMessageId, messageId, isPtt }
     );
 
     return result;
