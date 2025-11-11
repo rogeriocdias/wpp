@@ -18,6 +18,7 @@
 import { Page } from 'puppeteer';
 import { CreateConfig } from '../../config/create-config';
 import { evaluateAndReturn } from '../helpers';
+import { Wid, Chat } from '../model';
 import { GroupLayer } from './group.layer';
 
 export class UILayer extends GroupLayer {
@@ -31,10 +32,10 @@ export class UILayer extends GroupLayer {
    * @category UI
    * @param chatId
    */
-  public async openChat(chatId: string) {
+  public async openChat(chatId: string | Wid) {
     return evaluateAndReturn(
       this.page,
-      (chatId: string) => WPP.chat.openChatBottom(chatId),
+      (chatId: string) => WPP.chat.openChatBottom(chatId, undefined),
       chatId
     );
   }
@@ -45,10 +46,11 @@ export class UILayer extends GroupLayer {
    * @param chatId Chat id
    * @param messageId Message id (For example: '06D3AB3D0EEB9D077A3F9A3EFF4DD030')
    */
-  public async openChatAt(chatId: string, messageId: string) {
+  public async openChatAt(chatId: string | Wid, messageId: string) {
     return evaluateAndReturn(
       this.page,
-      (chatId: string, messageId) => WPP.chat.openChatAt(chatId, messageId),
+      (chatId: string, messageId) =>
+        WPP.chat.openChatAt(chatId, messageId, undefined),
       chatId,
       messageId
     );
