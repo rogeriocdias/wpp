@@ -1,3 +1,11 @@
+## <small>1.37.8 (2025-11-26)</small>
+
+- Merge pull request #2628 from wppconnect-team/manfe/bump-wa-js-versions ([f4117cb](https://github.com/wppconnect-team/wppconnect/commit/f4117cb)), closes [#2628](https://github.com/wppconnect-team/wppconnect/issues/2628)
+
+## <small>1.37.7 (2025-11-25)</small>
+
+- Merge pull request #2624 from wppconnect-team/manfe/bump-wa-js-versions ([eb652cf](https://github.com/wppconnect-team/wppconnect/commit/eb652cf)), closes [#2624](https://github.com/wppconnect-team/wppconnect/issues/2624)
+
 ## <small>1.37.6 (2025-11-11)</small>
 
 - [update] version whatsapp web (#2609) ([cf04c5d](https://github.com/wppconnect-team/wppconnect/commit/cf04c5d)), closes [#2609](https://github.com/wppconnect-team/wppconnect/issues/2609)
