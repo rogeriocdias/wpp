@@ -25,6 +25,14 @@ import type {
   SendMessageOptions,
   TextMessageOptions,
 } from '@wppconnect/wa-js/dist/chat';
+import type {
+  AutoDetectMessageOptions,
+  AudioMessageOptions,
+  DocumentMessageOptions,
+  ImageMessageOptions,
+  StickerMessageOptions,
+  VideoMessageOptions,
+} from '@wppconnect/wa-js/dist/chat/functions/sendFileMessage';
 import {
   OrderItems,
   OrderMessageOptions,
@@ -94,7 +102,7 @@ export class SenderLayer extends ListenerLayer {
    *
    * // With buttons
    * client.sendText('<number>@c.us', 'WPPConnect message with buttons', {
-   *    useTemplateButtons: true, // False for legacy
+   *    useInteractiveMessage: true, // False for legacy
    *    buttons: [
    *      {
    *        url: 'https://wppconnect.io/',
@@ -107,10 +115,6 @@ export class SenderLayer extends ListenerLayer {
    *      {
    *        id: 'your custom id 1',
    *        text: 'Some text'
-   *      },
-   *      {
-   *        id: 'another id 2',
-   *        text: 'Another text'
    *      }
    *    ],
    *    title: 'Title text' // Optional
@@ -121,7 +125,10 @@ export class SenderLayer extends ListenerLayer {
   public async sendText(
     to: string,
     content: string,
-    options?: TextMessageOptions
+    options?: TextMessageOptions & {
+      useInteractiveMessage?: boolean;
+      useTemplateButtons?: boolean;
+    }
   ): Promise<Message> {
     const sendResult = await evaluateAndReturn(
       this.page,
@@ -722,8 +729,9 @@ export class SenderLayer extends ListenerLayer {
    * client.sendFile('<number>@c.us', 'data:text/plain;base64,V1BQQ29ubmVjdA==');
    *
    * // With buttons
-   * client.sendFile('<number>@c.us', 'data:text/plain;base64,V1BQQ29ubmVjdA==', {
-   *    useTemplateButtons: true, // False for legacy
+   * // Buttons for files work with: document, image and video (max 3 buttons)
+   * client.sendFile('<number>@c.us', 'data:application/pdf;base64,JVBERi0xLjcKJc...', {
+   *    type: 'document',
    *    buttons: [
    *      {
    *        url: 'https://wppconnect.io/',
@@ -736,13 +744,8 @@ export class SenderLayer extends ListenerLayer {
    *      {
    *        id: 'your custom id 1',
    *        text: 'Some text'
-   *      },
-   *      {
-   *        id: 'another id 2',
-   *        text: 'Another text'
    *      }
    *    ],
-   *    title: 'Title text' // Optional
    *    footer: 'Footer text' // Optional
    * });
    * ```
@@ -755,7 +758,13 @@ export class SenderLayer extends ListenerLayer {
   public async sendFile(
     to: string | Wid,
     pathOrBase64: string,
-    options?: FileMessageOptions
+    options?:
+      | AutoDetectMessageOptions
+      | AudioMessageOptions
+      | DocumentMessageOptions
+      | ImageMessageOptions
+      | VideoMessageOptions
+      | StickerMessageOptions
   );
   /**
    * Sends file from path or base64
@@ -779,16 +788,29 @@ export class SenderLayer extends ListenerLayer {
   public async sendFile(
     to: string,
     pathOrBase64: string,
-    nameOrOptions?: string | FileMessageOptions,
+    nameOrOptions?:
+      | string
+      | AutoDetectMessageOptions
+      | AudioMessageOptions
+      | DocumentMessageOptions
+      | ImageMessageOptions
+      | VideoMessageOptions
+      | StickerMessageOptions,
     caption?: string
   ) {
-    let options: FileMessageOptions = { type: 'auto-detect' };
+    let options:
+      | AutoDetectMessageOptions
+      | AudioMessageOptions
+      | DocumentMessageOptions
+      | ImageMessageOptions
+      | VideoMessageOptions
+      | StickerMessageOptions = { type: 'auto-detect' };
 
     if (typeof nameOrOptions === 'string') {
-      options.filename = nameOrOptions;
-      options.caption = caption;
+      (options as FileMessageOptions).filename = nameOrOptions;
+      (options as FileMessageOptions).caption = caption;
     } else if (typeof nameOrOptions === 'object') {
-      options = nameOrOptions;
+      options = nameOrOptions as any;
     }
 
     let base64 = '';
@@ -805,7 +827,7 @@ export class SenderLayer extends ListenerLayer {
       }
 
       if (!options.filename) {
-        options.filename = path.basename(pathOrBase64);
+        (options as FileMessageOptions).filename = path.basename(pathOrBase64);
       }
     }
 
