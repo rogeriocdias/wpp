@@ -18,3 +18,6 @@ src/app.ts
 tokens
 yarn.lock
 package-lock.json
+# local wa-js fork (dev only)
+_wppjs/
+
