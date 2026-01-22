@@ -1,6 +1,6 @@
 {
   "name": "@wppconnect-team/wppconnect",
-  "version": "1.37.9",
+  "version": "1.38.0",
   "description": "WPPConnect is an open source project developed by the JavaScript community with the aim of exporting functions from WhatsApp Web to the node, which can be used to support the creation of any interaction, such as customer service, media sending, intelligence recognition based on phrases artificial and many other things, use your imagination... 😀🤔💭",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -84,7 +84,7 @@
     "prettier": "^2.8.8",
     "pretty-quick": "^4.2.2",
     "regenerator-runtime": "^0.14.1",
-    "release-it": "^19.2.3",
+    "release-it": "^19.2.4",
     "shx": "^0.4.0",
     "ts-node": "^10.9.2",
     "typedoc": "^0.28.16",
@@ -93,8 +93,8 @@
     "webpack-cli": "^6.0.1"
   },
   "dependencies": {
-    "@wppconnect/wa-js": "^3.19.6",
-    "@wppconnect/wa-version": "^1.5.2981",
+    "@wppconnect/wa-js": "^3.20.0",
+    "@wppconnect/wa-version": "^1.5.3099",
     "atob": "^2.1.2",
     "axios": "^1.13.2",
     "boxen": "^5.1.2",
@@ -108,7 +108,7 @@
     "logform": "^2.7.0",
     "lookpath": "^1.2.3",
     "mime-types": "^3.0.2",
-    "puppeteer": "^24.34.0",
+    "puppeteer": "^24.35.0",
     "puppeteer-extra": "^3.3.6",
     "puppeteer-extra-plugin-stealth": "^2.11.2",
     "puppeteer-extra-plugin-user-data-dir": "^2.4.1",
