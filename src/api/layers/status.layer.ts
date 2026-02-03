@@ -146,6 +146,80 @@ export class StatusLayer extends LabelsLayer {
   }
 
   /**
+   * Send an audio message to status stories
+   * @category Status
+   *
+   * @example
+   * ```javascript
+   * client.sendAudioStatus('data:audio/mp3;base64,<a long base64 file...>');
+   * ```
+   * @example
+   * ```javascript
+   * // Send with caption
+   * client.sendAudioStatus('data:audio/mp3;base64,<a long base64 file...>', { caption: 'example test' });
+   * ```
+   * @param pathOrBase64 Path or base 64 audio
+   */
+  public async sendAudioStatus(
+    pathOrBase64: string,
+    options?: SendStatusOptions & { caption?: string }
+  ) {
+    let base64: string = '';
+    if (pathOrBase64.startsWith('data:')) {
+      base64 = pathOrBase64;
+    } else {
+      let fileContent = await downloadFileToBase64(pathOrBase64, [
+        'audio/mpeg',
+        'audio/mp3',
+        'audio/wav',
+        'audio/ogg',
+        'audio/aac',
+      ]);
+      if (!fileContent) {
+        fileContent = await fileToBase64(pathOrBase64);
+      }
+      if (fileContent) {
+        base64 = fileContent;
+      }
+    }
+
+    if (!base64) {
+      const error = new Error('Empty or invalid file or base64');
+      Object.assign(error, {
+        code: 'empty_file',
+      });
+      throw error;
+    }
+
+    const mimeInfo = base64MimeType(base64);
+
+    if (!mimeInfo || !mimeInfo.includes('audio')) {
+      const error = new Error(
+        'Not an audio, allowed formats mp3, wav, ogg, aac'
+      );
+      Object.assign(error, {
+        code: 'invalid_audio',
+      });
+      throw error;
+    }
+
+    return await evaluateAndReturn(
+      this.page,
+      ({ base64, options }) => {
+        // Using sendFileMessage to status@broadcast as WA-JS may not have sendAudioStatus yet
+        return WPP.chat.sendFileMessage('status@broadcast', base64, {
+          type: 'audio',
+          isPtt: true,
+          caption: options?.caption,
+          waitForAck: options?.waitForAck ?? true,
+          messageId: options?.messageId,
+        });
+      },
+      { base64, options }
+    );
+  }
+
+  /**
    * Send a text to status stories
    * @category Status
    *
