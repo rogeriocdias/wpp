@@ -91,7 +91,7 @@ export class StatusLayer extends LabelsLayer {
     return await evaluateAndReturn(
       this.page,
       ({ base64, options }) => {
-        return WPP.status.sendImageStatus(base64, options);
+        WPP.status.sendImageStatus(base64, options);
       },
       { base64, options }
     );
@@ -139,7 +139,7 @@ export class StatusLayer extends LabelsLayer {
     return await evaluateAndReturn(
       this.page,
       ({ base64, options }) => {
-        return WPP.status.sendVideoStatus(base64, options);
+        WPP.status.sendVideoStatus(base64, options);
       },
       { base64, options }
     );
@@ -239,7 +239,7 @@ export class StatusLayer extends LabelsLayer {
     return await evaluateAndReturn(
       this.page,
       ({ text, options }) => {
-        return WPP.status.sendTextStatus(text, options);
+        WPP.status.sendTextStatus(text, options);
       },
       { text, options }
     );
