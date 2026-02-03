@@ -231,7 +231,7 @@ export class StatusLayer extends LabelsLayer {
    */
   public async sendTextStatus(
     text: string,
-    options: {
+    options?: SendStatusOptions & {
       backgroundColor?: string;
       font?: number;
     }
