@@ -1,3 +1,33 @@
+## 1.41.1 (2026-03-18)
+
+### Bug Fixes
+
+- t is not a function ([#2718](https://github.com/wppconnect-team/wppconnect/issues/2718)) ([3d65a1c](https://github.com/wppconnect-team/wppconnect/commit/3d65a1cf0ff0ea70d38e79d9a2b788f1050845ed))
+
+# 1.41.0 (2026-03-05)
+
+### Features
+
+- exposing new stream events and bump wa-version lib ([#2716](https://github.com/wppconnect-team/wppconnect/issues/2716)) ([7c6355e](https://github.com/wppconnect-team/wppconnect/commit/7c6355e5f3e6b0cbeb2066dc3441c959be8d80f5))
+
+## 1.40.1 (2026-02-28)
+
+### Bug Fixes
+
+- bump wa-js version ([#2713](https://github.com/wppconnect-team/wppconnect/issues/2713)) ([4647644](https://github.com/wppconnect-team/wppconnect/commit/46476440010e8c12e02dbfb1ba962342c3c1a39e))
+
+# 1.40.0 (2026-02-27)
+
+### Features
+
+- add event listener for new chat and expose onNewChat method ([#2712](https://github.com/wppconnect-team/wppconnect/issues/2712)) ([081f355](https://github.com/wppconnect-team/wppconnect/commit/081f35543bac9181bccfc1e815b1c7c5e4123cdd))
+
+# 1.39.0 (2026-02-27)
+
+### Features
+
+- update @wppconnect/wa-js to version 3.22.0 and refactor getMessagesFromRowId method ([#2710](https://github.com/wppconnect-team/wppconnect/issues/2710)) ([88c8457](https://github.com/wppconnect-team/wppconnect/commit/88c845786e419cd6e3187fe4e78cdfaf32f78cdd))
+
 ## 1.38.0 (2026-01-21)
 
 - feat(ui): add theme and auto download settings management methods (#2677) ([b2a63d3](https://github.com/wppconnect-team/wppconnect/commit/b2a63d3)), closes [#2677](https://github.com/wppconnect-team/wppconnect/issues/2677)

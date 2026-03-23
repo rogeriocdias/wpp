@@ -15,13 +15,14 @@
  * along with WPPConnect.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import { ChatListOptions } from '@wppconnect/wa-js/dist/chat';
+import { GetMessagesFromRowIdOptions } from '@wppconnect/wa-js/dist/indexdb';
 import { Page } from 'puppeteer';
 import { CreateConfig } from '../../config/create-config';
 import { SessionToken } from '../../token-store';
 import { evaluateAndReturn } from '../helpers';
 import {
   Chat,
-  Contact,
   ContactStatus,
   PartialMessage,
   ProfilePicThumbObj,
@@ -29,7 +30,6 @@ import {
   Wid,
 } from '../model';
 import { SenderLayer } from './sender.layer';
-import { ChatListOptions } from '@wppconnect/wa-js/dist/chat';
 
 export interface GetAllUnreadMessagesOptions {
   onlyUsers?: boolean;
@@ -670,6 +670,44 @@ export class RetrieverLayer extends SenderLayer {
       this.page,
       (phoneOrLid) => WPP.contact.getPnLidEntry(phoneOrLid),
       phoneOrLid
+    );
+  }
+
+  /**
+   * Get messages from IndexedDB 'model-storage' database starting from a specific rowId
+   *
+   * This function queries the IndexedDB database directly using the rowId index,
+   * retrieving messages with rowId greater than the specified value.
+   * It's useful for pagination or fetching messages in chronological order.
+   *
+   * @example
+   * ```javascript
+   * // Get 1000 messages after rowId 999960610
+   * const messages = await client.getMessagesFromRowId({ minRowId: 999960610 });
+   *
+   * // Get 500 messages after rowId 999960610
+   * const messages = await client.getMessagesFromRowId({
+   *   minRowId: 999960610,
+   *   limit: 500
+   * });
+   *
+   * // Get all available messages after rowId (use with caution)
+   * const messages = await client.getMessagesFromRowId({
+   *   minRowId: 999960610,
+   *   limit: -1
+   * });
+   * ```
+   * @category Chat
+   * @param options Options for fetching messages
+   * @returns Promise that resolves to an array of message objects from IndexedDB
+   */
+  public async getMessagesFromRowId(
+    input: GetMessagesFromRowIdOptions
+  ): Promise<any[]> {
+    return await evaluateAndReturn(
+      this.page,
+      (options) => WPP.indexdb.getMessagesFromRowId(options),
+      input
     );
   }
 }
