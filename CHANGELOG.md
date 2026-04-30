@@ -1,3 +1,21 @@
+# 2.0.0 (2026-04-30)
+
+### Features
+
+- support to wa-js v4 ([#2759](https://github.com/wppconnect-team/wppconnect/issues/2759)) ([16d05cd](https://github.com/wppconnect-team/wppconnect/commit/16d05cd6b7078a3c0a78acc676a12057b28091cc))
+
+## 1.41.3 (2026-04-23)
+
+### Features
+
+- add optional viewMode and associationType property to Message interface ([#2755](https://github.com/wppconnect-team/wppconnect/issues/2755)) ([454128a](https://github.com/wppconnect-team/wppconnect/commit/454128a74c0afc2291b5a21beaa940cca35744dd))
+
+## 1.41.2 (2026-04-17)
+
+### Bug Fixes
+
+- **deps:** bump @wppconnect/wa-js to ^3.23.4 and @wppconnect/wa-version to ^1.5.3731 ([#2749](https://github.com/wppconnect-team/wppconnect/issues/2749)) ([3e5e1ed](https://github.com/wppconnect-team/wppconnect/commit/3e5e1edd5586ce5b82ae2c44485b898d84d7828a))
+
 ## 1.41.1 (2026-03-18)
 
 ### Bug Fixes
