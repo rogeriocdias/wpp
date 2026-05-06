@@ -1,3 +1,15 @@
+## 2.0.2 (2026-05-04)
+
+### Bug Fixes
+
+- wa-js and axios version bump ([#2766](https://github.com/wppconnect-team/wppconnect/issues/2766)) ([d0e1421](https://github.com/wppconnect-team/wppconnect/commit/d0e1421a2e6b17e3a837909614fc0a53a17cd7f0))
+
+## 2.0.1 (2026-05-04)
+
+### Bug Fixes
+
+- tsconfig version to support spread operators natively and also fix the backendEvents ([#2764](https://github.com/wppconnect-team/wppconnect/issues/2764)) ([415926e](https://github.com/wppconnect-team/wppconnect/commit/415926e848c1717b91123debe9f6ce829b33280a))
+
 # 2.0.0 (2026-04-30)
 
 ### Features
