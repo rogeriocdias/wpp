@@ -489,7 +489,9 @@ if (typeof window.WAPI === 'undefined') {
    * @returns {boolean}
    */
   window.WAPI.onIncomingCall = function (callback) {
-    WPP.whatsapp.CallStore.on('add', callback);
+    WPP.ev.on('call.incoming_call', function (call) {
+      callback(call);
+    });
     return true;
   };
 
