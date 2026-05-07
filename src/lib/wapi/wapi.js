@@ -522,45 +522,26 @@ if (typeof window.WAPI === 'undefined') {
    * @returns {Promise<boolean>}
    */
   window.WAPI.rejectCall = async function (callId) {
-    const call = callId
-      ? WPP.whatsapp.CallStore.get(callId)
-      : WPP.whatsapp.CallStore.findFirst(() => true);
-
-    if (!call) {
+    // Monkey-patch ensureE2ESessions to be a no-op for the duration of the reject call.
+    // The original WPP.call.rejectCall hangs on first-contact calls because
+    // ensureE2ESessions waits for E2E key exchange that never completes for incoming calls.
+    var ws = WPP.whatsapp.websocket;
+    var origEnsure = ws.ensureE2ESessions;
+    ws.ensureE2ESessions = function () {
+      return Promise.resolve();
+    };
+    try {
+      var result = await WPP.call.rejectCall(callId);
+      return result;
+    } catch (e) {
+      // Re-throw as plain object so Puppeteer can serialize it without issues
       throw {
-        code: 'call_not_found',
-        message: 'Call ' + (callId || '<empty>') + ' not found',
+        code: (e && e.name) || 'error',
+        message: (e && e.message) || String(e),
       };
+    } finally {
+      ws.ensureE2ESessions = origEnsure;
     }
-
-    const myWid = WPP.whatsapp.UserPrefs.getMaybeMeUser
-      ? WPP.whatsapp.UserPrefs.getMaybeMeUser()
-      : WPP.whatsapp.UserPrefs.getMeUser
-      ? WPP.whatsapp.UserPrefs.getMeUser()
-      : null;
-
-    const stanza = WPP.whatsapp.websocket.smax(
-      'call',
-      {
-        from: myWid ? myWid.toString({ legacy: true }) : '',
-        to: call.peerJid.toString({ legacy: true }),
-        id: WPP.whatsapp.websocket.generateId(),
-      },
-      [
-        WPP.whatsapp.websocket.smax(
-          'reject',
-          {
-            'call-id': call.id,
-            'call-creator': call.peerJid.toString({ legacy: true }),
-            count: '0',
-          },
-          null
-        ),
-      ]
-    );
-
-    await WPP.whatsapp.websocket.sendSmaxStanza(stanza);
-    return true;
   };
 
   /**
