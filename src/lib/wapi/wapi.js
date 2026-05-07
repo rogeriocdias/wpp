@@ -522,25 +522,57 @@ if (typeof window.WAPI === 'undefined') {
    * @returns {Promise<boolean>}
    */
   window.WAPI.rejectCall = async function (callId) {
-    // Monkey-patch ensureE2ESessions to be a no-op for the duration of the reject call.
-    // The original WPP.call.rejectCall hangs on first-contact calls because
-    // ensureE2ESessions waits for E2E key exchange that never completes for incoming calls.
-    var ws = WPP.whatsapp.websocket;
-    var origEnsure = ws.ensureE2ESessions;
-    ws.ensureE2ESessions = function () {
-      return Promise.resolve();
-    };
+    // Build and send the reject stanza directly, without ensureE2ESessions.
+    // ensureE2ESessions is a read-only getter so cannot be monkey-patched.
+    // WPP.call.rejectCall hangs on first-contact calls waiting for E2E key exchange.
     try {
-      var result = await WPP.call.rejectCall(callId);
-      return result;
+      var call = callId
+        ? WPP.whatsapp.CallStore.get(callId)
+        : WPP.whatsapp.CallStore.findFirst(function () {
+            return true;
+          });
+
+      if (!call) {
+        throw {
+          code: 'call_not_found',
+          message: 'Call ' + (callId || '<empty>') + ' not found',
+        };
+      }
+
+      // getMyUserWid logic from wa-js module 21942
+      var myWid =
+        typeof WPP.whatsapp.UserPrefs.getMaybeMeUser === 'function'
+          ? WPP.whatsapp.UserPrefs.getMaybeMeUser()
+          : WPP.whatsapp.UserPrefs.getMaybeMePnUser();
+
+      var ws = WPP.whatsapp.websocket;
+      var stanza = ws.smax(
+        'call',
+        {
+          from: myWid.toString({ legacy: true }),
+          to: call.peerJid.toString({ legacy: true }),
+          id: ws.generateId(),
+        },
+        [
+          ws.smax(
+            'reject',
+            {
+              'call-id': call.id,
+              'call-creator': call.peerJid.toString({ legacy: true }),
+              count: '0',
+            },
+            null
+          ),
+        ]
+      );
+
+      await ws.sendSmaxStanza(stanza);
+      return true;
     } catch (e) {
-      // Re-throw as plain object so Puppeteer can serialize it without issues
       throw {
-        code: (e && e.name) || 'error',
+        code: (e && e.code) || (e && e.name) || 'error',
         message: (e && e.message) || String(e),
       };
-    } finally {
-      ws.ensureE2ESessions = origEnsure;
     }
   };
 
