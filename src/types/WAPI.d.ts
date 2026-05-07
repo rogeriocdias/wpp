@@ -103,6 +103,7 @@ interface WAPI {
   logout: () => Promise<boolean>;
   onAddedToGroup: (callback: Function) => any;
   onIncomingCall: (callback: Function) => any;
+  rejectCall: (callId?: string) => Promise<boolean>;
   onInterfaceChange: (callback: Function) => void;
   onLiveLocation: (callback: Function) => any;
   onNotificationMessage: (callback: (message: Message) => void) => any;

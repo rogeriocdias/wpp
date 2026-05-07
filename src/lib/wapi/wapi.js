@@ -516,6 +516,54 @@ if (typeof window.WAPI === 'undefined') {
   };
 
   /**
+   * Rejects an incoming call by sending a reject stanza directly,
+   * bypassing ensureE2ESessions which can hang on first-contact calls.
+   * @param callId string - optional call ID; if omitted, rejects the first found incoming call
+   * @returns {Promise<boolean>}
+   */
+  window.WAPI.rejectCall = async function (callId) {
+    const call = callId
+      ? WPP.whatsapp.CallStore.get(callId)
+      : WPP.whatsapp.CallStore.findFirst(() => true);
+
+    if (!call) {
+      throw {
+        code: 'call_not_found',
+        message: 'Call ' + (callId || '<empty>') + ' not found',
+      };
+    }
+
+    const myWid = WPP.whatsapp.UserPrefs.getMaybeMeUser
+      ? WPP.whatsapp.UserPrefs.getMaybeMeUser()
+      : WPP.whatsapp.UserPrefs.getMeUser
+      ? WPP.whatsapp.UserPrefs.getMeUser()
+      : null;
+
+    const stanza = WPP.whatsapp.websocket.smax(
+      'call',
+      {
+        from: myWid ? myWid.toString({ legacy: true }) : '',
+        to: call.peerJid.toString({ legacy: true }),
+        id: WPP.whatsapp.websocket.generateId(),
+      },
+      [
+        WPP.whatsapp.websocket.smax(
+          'reject',
+          {
+            'call-id': call.id,
+            'call-creator': call.peerJid.toString({ legacy: true }),
+            count: '0',
+          },
+          null
+        ),
+      ]
+    );
+
+    await WPP.whatsapp.websocket.sendSmaxStanza(stanza);
+    return true;
+  };
+
+  /**
    * Registers a callback to be called when the interface change
    * @param callback - function - Callback function to be called upon interface change. returns a call object.
    * @returns {boolean}

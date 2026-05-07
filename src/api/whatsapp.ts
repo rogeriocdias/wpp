@@ -350,12 +350,12 @@ export class Whatsapp extends BusinessLayer {
   /**
    * Rejects a call received via WhatsApp
    * @param callId string Call ID, if not passed, all calls will be rejected
-   * @returns Number of rejected calls
+   * @returns boolean
    */
   public async rejectCall(callId?: string) {
     return await evaluateAndReturn(
       this.page,
-      ({ callId }) => WPP.call.rejectCall(callId),
+      ({ callId }) => WAPI.rejectCall(callId),
       {
         callId,
       }
