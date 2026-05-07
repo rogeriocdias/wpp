@@ -522,9 +522,9 @@ if (typeof window.WAPI === 'undefined') {
    * @returns {Promise<boolean>}
    */
   window.WAPI.rejectCall = async function (callId) {
-    // Build and send the reject stanza directly, without ensureE2ESessions.
-    // ensureE2ESessions is a read-only getter so cannot be monkey-patched.
-    // WPP.call.rejectCall hangs on first-contact calls waiting for E2E key exchange.
+    // sendSmaxStanza awaits a server ACK that never arrives for call reject stanzas.
+    // We fire-and-forget: the stanza is flushed to the WebSocket buffer immediately,
+    // so the rejection signal reaches the caller even without awaiting the Promise.
     try {
       var call = callId
         ? WPP.whatsapp.CallStore.get(callId)
@@ -533,13 +533,9 @@ if (typeof window.WAPI === 'undefined') {
           });
 
       if (!call) {
-        throw {
-          code: 'call_not_found',
-          message: 'Call ' + (callId || '<empty>') + ' not found',
-        };
+        return false;
       }
 
-      // getMyUserWid logic from wa-js module 21942
       var myWid =
         typeof WPP.whatsapp.UserPrefs.getMaybeMeUser === 'function'
           ? WPP.whatsapp.UserPrefs.getMaybeMeUser()
@@ -566,13 +562,11 @@ if (typeof window.WAPI === 'undefined') {
         ]
       );
 
-      await ws.sendSmaxStanza(stanza);
+      // Fire-and-forget: do not await the ACK response, it never arrives for reject stanzas
+      ws.sendSmaxStanza(stanza).catch(function () {});
       return true;
     } catch (e) {
-      throw {
-        code: (e && e.code) || (e && e.name) || 'error',
-        message: (e && e.message) || String(e),
-      };
+      return false;
     }
   };
 
