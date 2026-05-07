@@ -490,7 +490,51 @@ if (typeof window.WAPI === 'undefined') {
    */
   window.WAPI.onIncomingCall = function (callback) {
     WPP.ev.on('call.incoming_call', function (call) {
-      callback(call);
+      // Fetch the full Backbone model from CallStore to get all fields
+      // and normalize peerJid to string (WID objects are not JSON-serializable with methods)
+      const model = WPP.whatsapp.CallStore.get(call.id);
+      const peerJidRaw = model ? model.peerJid : call.peerJid;
+      const peerJidStr =
+        typeof peerJidRaw === 'string'
+          ? peerJidRaw
+          : peerJidRaw && peerJidRaw._serialized
+          ? peerJidRaw._serialized
+          : peerJidRaw
+          ? peerJidRaw.toString()
+          : null;
+
+      callback({
+        id: call.id,
+        peerJid: peerJidStr,
+        offerTime: call.offerTime,
+        isVideo: call.isVideo,
+        isGroup: call.isGroup,
+        groupJid: model
+          ? model.groupJid || model.get('groupJid') || null
+          : null,
+        canHandleLocally: model
+          ? model.canHandleLocally || model.get('canHandleLocally') || false
+          : false,
+        outgoing: model
+          ? model.outgoing || model.get('outgoing') || false
+          : false,
+        isSilenced: model
+          ? model.isSilenced || model.get('isSilenced') || false
+          : false,
+        offerReceivedWhileOffline: model
+          ? model.offerReceivedWhileOffline ||
+            model.get('offerReceivedWhileOffline') ||
+            false
+          : false,
+        webClientShouldHandle: model
+          ? model.webClientShouldHandle ||
+            model.get('webClientShouldHandle') ||
+            false
+          : false,
+        participants: model
+          ? model.participants || model.get('participants') || []
+          : [],
+      });
     });
     return true;
   };
