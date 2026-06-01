@@ -1,6 +1,6 @@
 {
   "name": "@wppconnect-team/wppconnect",
-  "version": "2.2.0",
+  "version": "2.2.1",
   "description": "WPPConnect is an open source project developed by the JavaScript community with the aim of exporting functions from WhatsApp Web to the node, which can be used to support the creation of any interaction, such as customer service, media sending, intelligence recognition based on phrases artificial and many other things, use your imagination... 😀🤔💭",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -55,10 +55,10 @@
   },
   "homepage": "https://github.com/wppconnect-team/wppconnect#readme",
   "devDependencies": {
-    "@babel/core": "^7.29.0",
-    "@babel/eslint-parser": "^7.28.6",
-    "@babel/eslint-plugin": "^7.27.1",
-    "@babel/preset-env": "^7.29.5",
+    "@babel/core": "^7.29.7",
+    "@babel/eslint-parser": "^7.29.7",
+    "@babel/eslint-plugin": "^7.29.7",
+    "@babel/preset-env": "^7.29.7",
     "@commitlint/cli": "^20.5.3",
     "@commitlint/config-conventional": "^20.5.3",
     "@commitlint/cz-commitlint": "^20.5.3",
@@ -77,10 +77,10 @@
     "conventional-changelog-cli": "^5.0.0",
     "eslint": "10.4.0",
     "eslint-config-prettier": "^10.1.8",
-    "eslint-plugin-prettier": "^5.5.5",
+    "eslint-plugin-prettier": "^5.5.6",
     "globals": "^17.6.0",
     "husky": "^9.1.7",
-    "mocha": "^11.7.5",
+    "mocha": "^11.7.6",
     "prettier": "^2.8.8",
     "pretty-quick": "^4.2.2",
     "regenerator-runtime": "^0.14.1",
@@ -90,7 +90,7 @@
     "typedoc": "^0.28.19",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.59.4",
-    "webpack": "^5.106.2",
+    "webpack": "^5.107.2",
     "webpack-cli": "^6.0.1"
   },
   "dependencies": {
@@ -119,10 +119,10 @@
     "rimraf": "^3.0.2",
     "sanitize-filename": "^1.6.4",
     "sharp": "0.34.5",
-    "tmp": "^0.2.5",
+    "tmp": "^0.2.7",
     "tree-kill": "^1.2.2",
     "winston": "^3.19.0",
-    "ws": "^8.20.1"
+    "ws": "^8.21.0"
   },
   "optionalDependencies": {
     "@img/sharp-win32-x64": "^0.34.5",
