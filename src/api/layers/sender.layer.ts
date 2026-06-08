@@ -348,10 +348,21 @@ export class SenderLayer extends ListenerLayer {
         mentionedList,
         options,
       }) => {
-        const result = await WPP.chat.sendFileMessage(to, base64, {
+        const rawMessageId =
+          options?.msgId ??
+          options?.messageId ??
+          (await WPP.chat.generateMessageID(to));
+        const serializedMessageId = String(
+          (rawMessageId && rawMessageId._serialized) ||
+            (rawMessageId && rawMessageId.toString
+              ? rawMessageId.toString()
+              : rawMessageId ?? '')
+        );
+
+        await WPP.chat.sendFileMessage(to, base64, {
           type: 'image',
           isViewOnce,
-          messageId: options?.msgId,
+          messageId: rawMessageId,
           filename,
           caption,
           quotedMsg: quotedMessageId,
@@ -360,10 +371,11 @@ export class SenderLayer extends ListenerLayer {
           mentionedList: mentionedList,
         });
 
+        const message = await WAPI.getMessageById(serializedMessageId);
+
         return {
-          ack: result.ack,
-          id: result.id,
-          sendMsgResult: await result.sendMsgResult,
+          ack: message?.ack ?? null,
+          id: serializedMessageId,
         };
       },
       {
@@ -538,20 +550,30 @@ export class SenderLayer extends ListenerLayer {
         messageId,
         isPtt,
       }) => {
-        const result = await WPP.chat.sendFileMessage(to, base64, {
+        const rawMessageId =
+          messageId ?? (await WPP.chat.generateMessageID(to));
+        const serializedMessageId = String(
+          (rawMessageId && rawMessageId._serialized) ||
+            (rawMessageId && rawMessageId.toString
+              ? rawMessageId.toString()
+              : rawMessageId ?? '')
+        );
+
+        await WPP.chat.sendFileMessage(to, base64, {
           type: 'audio',
           isPtt: isPtt,
           filename,
           caption,
           quotedMsg: quotedMessageId,
           waitForAck: true,
-          messageId: messageId,
+          messageId: rawMessageId,
         });
 
+        const message = await WAPI.getMessageById(serializedMessageId);
+
         return {
-          ack: result.ack,
-          id: result.id,
-          sendMsgResult: await result.sendMsgResult,
+          ack: message?.ack ?? null,
+          id: serializedMessageId,
         };
       },
       { to, base64, filename, caption, quotedMessageId, messageId, isPtt }
@@ -748,11 +770,27 @@ export class SenderLayer extends ListenerLayer {
     return evaluateAndReturn(
       this.page,
       async ({ to, base64, options }) => {
-        const result = await WPP.chat.sendFileMessage(to, base64, options);
+        const rawMessageId =
+          options?.msgId ??
+          options?.messageId ??
+          (await WPP.chat.generateMessageID(to));
+        const serializedMessageId = String(
+          (rawMessageId && rawMessageId._serialized) ||
+            (rawMessageId && rawMessageId.toString
+              ? rawMessageId.toString()
+              : rawMessageId ?? '')
+        );
+
+        await WPP.chat.sendFileMessage(to, base64, {
+          ...options,
+          messageId: rawMessageId,
+        });
+
+        const message = await WAPI.getMessageById(serializedMessageId);
+
         return {
-          ack: result.ack,
-          id: result.id,
-          sendMsgResult: await result.sendMsgResult,
+          ack: message?.ack ?? null,
+          id: serializedMessageId,
         };
       },
       { to, base64, options: options as any }
@@ -814,19 +852,29 @@ export class SenderLayer extends ListenerLayer {
     const result = await evaluateAndReturn(
       this.page,
       async ({ to, base64, filename, caption, quotedMessageId }) => {
-        const result = await WPP.chat.sendFileMessage(to, base64, {
+        const rawMessageId = await WPP.chat.generateMessageID(to);
+        const serializedMessageId = String(
+          (rawMessageId && rawMessageId._serialized) ||
+            (rawMessageId && rawMessageId.toString
+              ? rawMessageId.toString()
+              : rawMessageId ?? '')
+        );
+
+        await WPP.chat.sendFileMessage(to, base64, {
           type: 'video',
           isGif: true,
           filename,
           caption,
           quotedMsg: quotedMessageId,
           waitForAck: true,
+          messageId: rawMessageId,
         });
 
+        const message = await WAPI.getMessageById(serializedMessageId);
+
         return {
-          ack: result.ack,
-          id: result.id,
-          sendMsgResult: await result.sendMsgResult,
+          ack: message?.ack ?? null,
+          id: serializedMessageId,
         };
       },
       { to, base64, filename, caption, quotedMessageId }
@@ -1058,11 +1106,30 @@ export class SenderLayer extends ListenerLayer {
 
     return await evaluateAndReturn(
       this.page,
-      ({ to, webpBase64, options }) => {
-        return WPP.chat.sendFileMessage(to, webpBase64, {
+      async ({ to, webpBase64, options }) => {
+        const rawMessageId =
+          options?.msgId ??
+          options?.messageId ??
+          (await WPP.chat.generateMessageID(to));
+        const serializedMessageId = String(
+          (rawMessageId && rawMessageId._serialized) ||
+            (rawMessageId && rawMessageId.toString
+              ? rawMessageId.toString()
+              : rawMessageId ?? '')
+        );
+
+        await WPP.chat.sendFileMessage(to, webpBase64, {
           type: 'sticker',
+          waitForAck: true,
           ...options,
+          messageId: rawMessageId,
         });
+        const message = await WAPI.getMessageById(serializedMessageId);
+
+        return {
+          ack: message?.ack ?? null,
+          id: serializedMessageId,
+        };
       },
       { to, webpBase64, options }
     );
@@ -1154,11 +1221,30 @@ export class SenderLayer extends ListenerLayer {
 
     return await evaluateAndReturn(
       this.page,
-      ({ to, webpBase64, options }) => {
-        return WPP.chat.sendFileMessage(to, webpBase64, {
+      async ({ to, webpBase64, options }) => {
+        const rawMessageId =
+          options?.msgId ??
+          options?.messageId ??
+          (await WPP.chat.generateMessageID(to));
+        const serializedMessageId = String(
+          (rawMessageId && rawMessageId._serialized) ||
+            (rawMessageId && rawMessageId.toString
+              ? rawMessageId.toString()
+              : rawMessageId ?? '')
+        );
+
+        await WPP.chat.sendFileMessage(to, webpBase64, {
           type: 'sticker',
+          waitForAck: true,
           ...options,
+          messageId: rawMessageId,
         });
+        const message = await WAPI.getMessageById(serializedMessageId);
+
+        return {
+          ack: message?.ack ?? null,
+          id: serializedMessageId,
+        };
       },
       { to, webpBase64, options }
     );
@@ -1203,12 +1289,27 @@ export class SenderLayer extends ListenerLayer {
     return await evaluateAndReturn(
       this.page,
       async ({ to, options }) => {
-        const result = await WPP.chat.sendLocationMessage(to, options);
+        const rawMessageId =
+          options?.msgId ??
+          options?.messageId ??
+          (await WPP.chat.generateMessageID(to));
+        const serializedMessageId = String(
+          (rawMessageId && rawMessageId._serialized) ||
+            (rawMessageId && rawMessageId.toString
+              ? rawMessageId.toString()
+              : rawMessageId ?? '')
+        );
+
+        await WPP.chat.sendLocationMessage(to, {
+          ...options,
+          messageId: rawMessageId,
+        });
+
+        const message = await WAPI.getMessageById(serializedMessageId);
 
         return {
-          ack: result.ack,
-          id: result.id,
-          sendMsgResult: await result.sendMsgResult,
+          ack: message?.ack ?? null,
+          id: serializedMessageId,
         };
       },
       { to, options: options as any }

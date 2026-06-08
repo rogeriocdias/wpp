@@ -205,15 +205,31 @@ export class StatusLayer extends LabelsLayer {
 
     return await evaluateAndReturn(
       this.page,
-      ({ base64, options }) => {
+      async ({ base64, options }) => {
         // Using sendFileMessage to status@broadcast as WA-JS may not have sendAudioStatus yet
-        return WPP.chat.sendFileMessage('status@broadcast', base64, {
+        const rawMessageId =
+          options?.messageId ??
+          (await WPP.chat.generateMessageID('status@broadcast'));
+        const serializedMessageId = String(
+          (rawMessageId && rawMessageId._serialized) ||
+            (rawMessageId && rawMessageId.toString
+              ? rawMessageId.toString()
+              : rawMessageId ?? '')
+        );
+
+        await WPP.chat.sendFileMessage('status@broadcast', base64, {
           type: 'audio',
           isPtt: true,
           caption: options?.caption,
           waitForAck: options?.waitForAck ?? true,
-          messageId: options?.messageId,
+          messageId: rawMessageId,
         });
+
+        const message = await WAPI.getMessageById(serializedMessageId);
+        return {
+          ack: message?.ack ?? null,
+          id: serializedMessageId,
+        };
       },
       { base64, options }
     );
