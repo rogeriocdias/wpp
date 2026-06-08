@@ -558,8 +558,17 @@ export class SenderLayer extends ListenerLayer {
           typeof quotedMessageId === 'string' && quotedMessageId.trim()
             ? quotedMessageId
             : undefined;
+        const chat = await WPP.chat.get(to);
+        const resolvedChatId =
+          (chat?.id &&
+            (typeof chat.id === 'string'
+              ? chat.id
+              : (chat.id as any)?._serialized ||
+                (chat.id as any)?.toString?.())) ||
+          to;
         const rawMessageId =
-          normalizedMessageId ?? (await WPP.chat.generateMessageID(to));
+          normalizedMessageId ??
+          (await WPP.chat.generateMessageID(resolvedChatId));
         const serializedMessageId = String(
           (rawMessageId && rawMessageId._serialized) ||
             (rawMessageId && rawMessageId.toString
@@ -567,7 +576,7 @@ export class SenderLayer extends ListenerLayer {
               : rawMessageId ?? '')
         );
 
-        await WPP.chat.sendFileMessage(to, base64, {
+        await WPP.chat.sendFileMessage(resolvedChatId, base64, {
           type: 'audio',
           isPtt: isPtt,
           filename,
