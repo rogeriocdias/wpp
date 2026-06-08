@@ -550,8 +550,16 @@ export class SenderLayer extends ListenerLayer {
         messageId,
         isPtt,
       }) => {
+        const normalizedMessageId =
+          typeof messageId === 'string' && messageId.trim()
+            ? messageId
+            : undefined;
+        const normalizedQuotedMessageId =
+          typeof quotedMessageId === 'string' && quotedMessageId.trim()
+            ? quotedMessageId
+            : undefined;
         const rawMessageId =
-          messageId ?? (await WPP.chat.generateMessageID(to));
+          normalizedMessageId ?? (await WPP.chat.generateMessageID(to));
         const serializedMessageId = String(
           (rawMessageId && rawMessageId._serialized) ||
             (rawMessageId && rawMessageId.toString
@@ -564,7 +572,7 @@ export class SenderLayer extends ListenerLayer {
           isPtt: isPtt,
           filename,
           caption,
-          quotedMsg: quotedMessageId,
+          quotedMsg: normalizedQuotedMessageId,
           waitForAck: true,
           messageId: rawMessageId,
         });

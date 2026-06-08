@@ -391,7 +391,13 @@ class SenderLayer extends listener_layer_1.ListenerLayer {
      */
     async sendPttFromBase64(to, base64, filename, caption, quotedMessageId, messageId, isPtt = true) {
         const result = await (0, helpers_1.evaluateAndReturn)(this.page, async ({ to, base64, filename, caption, quotedMessageId, messageId, isPtt, }) => {
-            const rawMessageId = messageId ?? (await WPP.chat.generateMessageID(to));
+            const normalizedMessageId = typeof messageId === 'string' && messageId.trim()
+                ? messageId
+                : undefined;
+            const normalizedQuotedMessageId = typeof quotedMessageId === 'string' && quotedMessageId.trim()
+                ? quotedMessageId
+                : undefined;
+            const rawMessageId = normalizedMessageId ?? (await WPP.chat.generateMessageID(to));
             const serializedMessageId = String((rawMessageId && rawMessageId._serialized) ||
                 (rawMessageId && rawMessageId.toString
                     ? rawMessageId.toString()
@@ -401,7 +407,7 @@ class SenderLayer extends listener_layer_1.ListenerLayer {
                 isPtt: isPtt,
                 filename,
                 caption,
-                quotedMsg: quotedMessageId,
+                quotedMsg: normalizedQuotedMessageId,
                 waitForAck: true,
                 messageId: rawMessageId,
             });
