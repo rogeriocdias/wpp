@@ -169,7 +169,7 @@ export declare class SenderLayer extends ListenerLayer {
      * @param messageId Set the id for this message
      * @param isPtt Set as ptt audio
      */
-    sendPttFromBase64(to: string, base64: string, filename: string, caption?: string, quotedMessageId?: string, messageId?: string, isPtt?: boolean): Promise<{
+    sendPttFromBase64(to: string, base64: string, filename: string, caption?: string, quotedMessageId?: string, isPtt?: boolean): Promise<{
         ack: number;
         id: string;
     }>;
