@@ -36,7 +36,7 @@ export declare class UILayer extends GroupLayer {
      * @category UI
      * @returns Current theme ('dark' or 'light')
      */
-    getTheme(): Promise<any>;
+    getTheme(): Promise<Theme>;
     /**
      * Set theme
      * Note: This will force a reload of WhatsApp Web to take effect
@@ -44,13 +44,18 @@ export declare class UILayer extends GroupLayer {
      * @param theme Theme to set ('dark' or 'light')
      * @returns void
      */
-    setTheme(theme: Theme): Promise<any>;
+    setTheme(theme: Theme): Promise<void>;
     /**
      * Get auto download settings
      * @category UI
      * @returns Auto download settings
      */
-    getAutoDownloadSettings(): Promise<any>;
+    getAutoDownloadSettings(): Promise<{
+        photos: boolean;
+        audio: boolean;
+        videos: boolean;
+        documents: boolean;
+    }>;
     /**
      * Set auto download settings
      * Note: This will force a reload of WhatsApp Web to take effect
@@ -58,5 +63,5 @@ export declare class UILayer extends GroupLayer {
      * @param settings Auto download settings to set
      * @returns void
      */
-    setAutoDownloadSettings(settings: AutoDownloadSettings): Promise<any>;
+    setAutoDownloadSettings(settings: AutoDownloadSettings): Promise<void>;
 }

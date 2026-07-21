@@ -18,7 +18,7 @@ export declare class ListsLayer extends CatalogLayer {
      * @param chatIds Chat IDs to add to the list
      * @param colorIndex Optional color index
      */
-    createList(name: string, chatIds?: string[], colorIndex?: number): Promise<any>;
+    createList(name: string, chatIds?: string[], colorIndex?: number): Promise<string>;
     /**
      * Return all custom lists
      * @category Lists
@@ -28,7 +28,7 @@ export declare class ListsLayer extends CatalogLayer {
      * const lists = await client.getAllLists();
      * ```
      */
-    getAllLists(): Promise<any>;
+    getAllLists(): Promise<import("@wppconnect/wa-js/dist/lists").ListInfo[]>;
     /**
      * Add chats to an existing list
      * @category Lists
@@ -40,7 +40,7 @@ export declare class ListsLayer extends CatalogLayer {
      * @param listId List ID
      * @param chatIds Chat IDs to add
      */
-    addChatsToList(listId: string, chatIds: string[]): Promise<any>;
+    addChatsToList(listId: string, chatIds: string[]): Promise<void>;
     /**
      * Remove chats from a list
      * @category Lists
@@ -52,7 +52,7 @@ export declare class ListsLayer extends CatalogLayer {
      * @param listId List ID
      * @param chatIds Chat IDs to remove
      */
-    removeChatsFromList(listId: string, chatIds: string[]): Promise<any>;
+    removeChatsFromList(listId: string, chatIds: string[]): Promise<void>;
     /**
      * Rename a list
      * @category Lists
@@ -64,7 +64,7 @@ export declare class ListsLayer extends CatalogLayer {
      * @param listId List ID
      * @param newName New name
      */
-    renameList(listId: string, newName: string): Promise<any>;
+    renameList(listId: string, newName: string): Promise<void>;
     /**
      * Delete a list
      * @category Lists
@@ -75,5 +75,5 @@ export declare class ListsLayer extends CatalogLayer {
      * ```
      * @param listId List ID
      */
-    deleteList(listId: string): Promise<any>;
+    deleteList(listId: string): Promise<void>;
 }

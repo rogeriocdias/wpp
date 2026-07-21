@@ -380,7 +380,7 @@ class SenderLayer extends listener_layer_1.ListenerLayer {
      * @param isPtt Set as ptt audio
      */
     async sendPttFromBase64(to, base64, filename, caption, quotedMessageId, isPtt = true) {
-        const result = await (0, helpers_1.evaluateAndReturn)(this.page, async ({ to, base64, filename, caption, quotedMessageId, isPtt, }) => {
+        const result = await (0, helpers_1.evaluateAndReturn)(this.page, async ({ to, base64, filename, caption, quotedMessageId, isPtt }) => {
             const normalizedQuotedMessageId = typeof quotedMessageId === 'string' && quotedMessageId.trim()
                 ? quotedMessageId
                 : undefined;

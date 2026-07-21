@@ -146,9 +146,7 @@ export declare class GroupLayer extends RetrieverLayer {
      * @example joinGroup('https://chat.whatsapp.com/invite/CMJYfPFqRyE2GxrnkldYED')
      * @example joinGroup('CMJYfPFqRyE2GxrnkldYED')
      */
-    joinGroup(inviteCode: string): Promise<{
-        id: string;
-    }>;
+    joinGroup(inviteCode: string): Promise<import("@wppconnect/wa-js/dist/group/functions/join").JoinGroupResult>;
     /**
      * Set group description (if allowed)
      * @category Group
