@@ -15,13 +15,15 @@
  * along with WPPConnect.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+const getSerializedId = (id) => id?._serialized || id?.$1;
+
 export const _serializeMessageObj = (obj) => {
   if (obj == undefined) {
     return null;
   }
   if (obj.quotedMsg && obj.quotedMsgObj) obj.quotedMsgObj();
   return Object.assign(window.WAPI._serializeRawObj(obj), {
-    id: obj.id._serialized,
+    id: getSerializedId(obj.id),
     from: obj.from._serialized,
     quotedParticipant: obj?.quotedParticipant?._serialized,
     author: obj?.author?._serialized,
@@ -40,7 +42,7 @@ export const _serializeMessageObj = (obj) => {
     isNotification: obj.isNotification,
     isPSA: obj.isPSA,
     type: obj.type,
-    quotedMsgId: obj?._quotedMsgObj?.id?._serialized,
+    quotedMsgId: getSerializedId(obj?._quotedMsgObj?.id),
     mediaData: window.WAPI._serializeRawObj(obj['mediaData']),
   });
 };
