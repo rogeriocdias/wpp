@@ -193,8 +193,6 @@ export class GroupLayer extends RetrieverLayer {
         WPP.group.promoteParticipants(groupId, participantId),
       { groupId, participantId }
     );
-
-    return true;
   }
 
   /**
@@ -213,8 +211,6 @@ export class GroupLayer extends RetrieverLayer {
         WPP.group.demoteParticipants(groupId, participantId),
       { groupId, participantId }
     );
-
-    return true;
   }
 
   /**
