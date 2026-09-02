@@ -336,7 +336,7 @@ export class SenderLayer extends ListenerLayer {
 
     filename = filenameFromMimeType(filename, mimeType);
 
-    const result = await evaluateAndReturn(
+    const sendResult = await evaluateAndReturn(
       this.page,
       async ({
         to,
@@ -346,10 +346,12 @@ export class SenderLayer extends ListenerLayer {
         quotedMessageId,
         isViewOnce,
         mentionedList,
+        options,
       }) => {
-        const sendResult = await WPP.chat.sendFileMessage(to, base64, {
+        const result = await WPP.chat.sendFileMessage(to, base64, {
           type: 'image',
           isViewOnce,
+          messageId: options?.msgId,
           filename,
           caption,
           quotedMsg: quotedMessageId,
@@ -358,10 +360,7 @@ export class SenderLayer extends ListenerLayer {
           mentionedList: mentionedList,
         });
 
-        return {
-          ack: sendResult?.ack ?? null,
-          id: sendResult?.id ?? '',
-        };
+        return { ack: result.ack, id: result.id };
       },
       {
         to,
@@ -371,10 +370,11 @@ export class SenderLayer extends ListenerLayer {
         quotedMessageId,
         isViewOnce,
         mentionedList,
+        options,
       }
     );
 
-    return result;
+    return sendResult;
   }
 
   /**
@@ -520,45 +520,36 @@ export class SenderLayer extends ListenerLayer {
     filename: string,
     caption?: string,
     quotedMessageId?: string,
+    messageId?: string,
     isPtt: boolean = true
   ) {
-    const result = await evaluateAndReturn(
+    const sendResult = await evaluateAndReturn(
       this.page,
-      async ({ to, base64, filename, caption, quotedMessageId, isPtt }) => {
-        const normalizedQuotedMessageId =
-          typeof quotedMessageId === 'string' && quotedMessageId.trim()
-            ? quotedMessageId
-            : undefined;
-        const chat = await WPP.chat.get(to);
-        const resolvedChatId =
-          (chat?.id &&
-            (typeof chat.id === 'string'
-              ? chat.id
-              : (chat.id as any)?._serialized ||
-                (chat.id as any)?.toString?.())) ||
-          to;
-        const sendResult = await WPP.chat.sendFileMessage(
-          resolvedChatId,
-          base64,
-          {
-            type: 'audio',
-            isPtt: isPtt,
-            filename,
-            caption,
-            quotedMsg: normalizedQuotedMessageId,
-            waitForAck: true,
-          }
-        );
+      async ({
+        to,
+        base64,
+        filename,
+        caption,
+        quotedMessageId,
+        messageId,
+        isPtt,
+      }) => {
+        const result = await WPP.chat.sendFileMessage(to, base64, {
+          type: 'audio',
+          isPtt: isPtt,
+          filename,
+          caption,
+          quotedMsg: quotedMessageId,
+          waitForAck: true,
+          messageId: messageId,
+        });
 
-        return {
-          ack: sendResult?.ack ?? null,
-          id: sendResult?.id ?? '',
-        };
+        return { ack: result.ack, id: result.id };
       },
-      { to, base64, filename, caption, quotedMessageId, isPtt }
+      { to, base64, filename, caption, quotedMessageId, messageId, isPtt }
     );
 
-    return result;
+    return sendResult;
   }
 
   /**
@@ -608,6 +599,7 @@ export class SenderLayer extends ListenerLayer {
         filename,
         caption,
         quotedMessageId,
+        messageId,
         isPtt
       )
         .then(resolve)
@@ -745,27 +737,19 @@ export class SenderLayer extends ListenerLayer {
       throw error;
     }
 
-    return evaluateAndReturn(
+    const sendResult = await evaluateAndReturn(
       this.page,
       async ({ to, base64, options }) => {
-        const {
-          msgId: _msgId,
-          messageId: _messageId,
-          ...sendOptions
-        } = options || {};
-        const sendResult = await WPP.chat.sendFileMessage(
-          to,
-          base64,
-          sendOptions
-        );
-
-        return {
-          ack: sendResult?.ack ?? null,
-          id: sendResult?.id ?? '',
-        };
+        const result = await WPP.chat.sendFileMessage(to, base64, {
+          waitForAck: true,
+          ...options,
+        });
+        return { ack: result.ack, id: result.id };
       },
       { to, base64, options: options as any }
     );
+
+    return sendResult;
   }
 
   /**
@@ -820,10 +804,10 @@ export class SenderLayer extends ListenerLayer {
     caption?: string,
     quotedMessageId?: string
   ) {
-    const result = await evaluateAndReturn(
+    const sendResult = await evaluateAndReturn(
       this.page,
       async ({ to, base64, filename, caption, quotedMessageId }) => {
-        const sendResult = await WPP.chat.sendFileMessage(to, base64, {
+        const result = await WPP.chat.sendFileMessage(to, base64, {
           type: 'video',
           isGif: true,
           filename,
@@ -832,15 +816,12 @@ export class SenderLayer extends ListenerLayer {
           waitForAck: true,
         });
 
-        return {
-          ack: sendResult?.ack ?? null,
-          id: sendResult?.id ?? '',
-        };
+        return { ack: result.ack, id: result.id };
       },
       { to, base64, filename, caption, quotedMessageId }
     );
 
-    return result;
+    return sendResult;
   }
 
   /**
@@ -1066,22 +1047,11 @@ export class SenderLayer extends ListenerLayer {
 
     return await evaluateAndReturn(
       this.page,
-      async ({ to, webpBase64, options }) => {
-        const {
-          msgId: _msgId,
-          messageId: _messageId,
-          ...sendOptions
-        } = options || {};
-        const sendResult = await WPP.chat.sendFileMessage(to, webpBase64, {
+      ({ to, webpBase64, options }) => {
+        return WPP.chat.sendFileMessage(to, webpBase64, {
           type: 'sticker',
-          waitForAck: true,
-          ...sendOptions,
+          ...options,
         });
-
-        return {
-          ack: sendResult?.ack ?? null,
-          id: sendResult?.id ?? '',
-        };
       },
       { to, webpBase64, options }
     );
@@ -1173,22 +1143,11 @@ export class SenderLayer extends ListenerLayer {
 
     return await evaluateAndReturn(
       this.page,
-      async ({ to, webpBase64, options }) => {
-        const {
-          msgId: _msgId,
-          messageId: _messageId,
-          ...sendOptions
-        } = options || {};
-        const sendResult = await WPP.chat.sendFileMessage(to, webpBase64, {
+      ({ to, webpBase64, options }) => {
+        return WPP.chat.sendFileMessage(to, webpBase64, {
           type: 'sticker',
-          waitForAck: true,
-          ...sendOptions,
+          ...options,
         });
-
-        return {
-          ack: sendResult?.ack ?? null,
-          id: sendResult?.id ?? '',
-        };
       },
       { to, webpBase64, options }
     );
@@ -1230,23 +1189,17 @@ export class SenderLayer extends ListenerLayer {
           }
         : latitudeOrOptions;
 
-    return await evaluateAndReturn(
+    const sendResult = await evaluateAndReturn(
       this.page,
       async ({ to, options }) => {
-        const {
-          msgId: _msgId,
-          messageId: _messageId,
-          ...sendOptions
-        } = options || {};
-        const sendResult = await WPP.chat.sendLocationMessage(to, sendOptions);
+        const result = await WPP.chat.sendLocationMessage(to, options);
 
-        return {
-          ack: sendResult?.ack ?? null,
-          id: sendResult?.id ?? '',
-        };
+        return { ack: result.ack, id: result.id };
       },
       { to, options: options as any }
     );
+
+    return sendResult;
   }
 
   /**

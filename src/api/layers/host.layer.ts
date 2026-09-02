@@ -48,6 +48,7 @@ export class HostLayer {
 
   protected isInitialized = false;
   protected isInjected = false;
+  protected pageLoadPromise?: Promise<void>;
   protected isStarted = false;
   protected isLogged = false;
   protected isInChat = false;
@@ -88,7 +89,15 @@ export class HostLayer {
 
     this.page.on('load', () => {
       this.log('verbose', 'Page loaded', { type: 'page' });
-      this.afterPageLoad();
+      this.isInjected = false;
+
+      const previousPageLoad = this.pageLoadPromise?.catch(() => undefined);
+      const pageLoad = (previousPageLoad || Promise.resolve()).then(() =>
+        this.afterPageLoad()
+      );
+
+      this.pageLoadPromise = pageLoad;
+      void pageLoad.catch(() => undefined);
     });
 
     this.isInitialized = true;
@@ -113,19 +122,16 @@ export class HostLayer {
       options
     );
 
-    this.isInjected = false;
-
-    await injectApi(this.page, this.onLoadingScreen)
-      .then(() => {
-        this.isInjected = true;
-        this.log('verbose', 'wapi.js injected');
-        this.afterPageScriptInjected();
-      })
-      .catch((e) => {
-        console.log(e);
-        this.log('verbose', 'wapi.js failed');
-        this.log('error', e);
-      });
+    try {
+      await injectApi(this.page, this.onLoadingScreen);
+      this.isInjected = true;
+      this.log('verbose', 'wapi.js injected');
+      this.afterPageScriptInjected();
+    } catch (error) {
+      this.log('verbose', 'wapi.js failed');
+      this.log('error', error);
+      throw error;
+    }
   }
 
   protected async afterPageScriptInjected() {
@@ -141,13 +147,27 @@ export class HostLayer {
       .catch(() => null);
 
     evaluateAndReturn(this.page, () => {
-      WPP.on('conn.auth_code_change', (window as any).checkQrCode);
-    }).catch(() => null);
-    evaluateAndReturn(this.page, () => {
       WPP.on('conn.main_ready', (window as any).checkInChat);
     }).catch(() => null);
+
+    if (typeof this.options.phoneNumber === 'string') {
+      await evaluateAndReturn(this.page, () => {
+        WPP.on('conn.link_code_change', (window as any).onLinkCode);
+        WPP.on('conn.link_code_expired', (window as any).onLinkCodeExpired);
+        WPP.on('conn.link_code_error', (error) =>
+          (window as any).onLinkCodeError(error.message)
+        );
+      }).catch(() => null);
+      await this.loginByCode(this.options.phoneNumber).catch((error) =>
+        this.log('error', error)
+      );
+    } else {
+      await evaluateAndReturn(this.page, () => {
+        WPP.on('conn.auth_code_change', (window as any).checkQrCode);
+      }).catch(() => null);
+      this.checkQrCode();
+    }
     this.checkInChat();
-    this.checkQrCode();
   }
 
   public async start() {
@@ -167,9 +187,15 @@ export class HostLayer {
     );
 
     await this.page.exposeFunction('checkQrCode', () => this.checkQrCode());
-    /*await this.page.exposeFunction('loginByCode', (phone: string) =>
-      this.loginByCode(phone)
-    );*/
+    await this.page.exposeFunction('onLinkCode', (code: string) =>
+      this.onLinkCode(code)
+    );
+    await this.page.exposeFunction('onLinkCodeExpired', () =>
+      this.log('warn', 'Login by code expired; call refreshLinkCode() to retry')
+    );
+    await this.page.exposeFunction('onLinkCodeError', (message: string) =>
+      this.log('error', `Login by code failed: ${message}`)
+    );
     await this.page.exposeFunction('checkInChat', () => this.checkInChat());
 
     this.checkStartInterval = setInterval(() => this.checkStart(), 5000);
@@ -199,9 +225,6 @@ export class HostLayer {
     if (!result?.urlCode || this.urlCode === result.urlCode) {
       return;
     }
-    if (typeof this.options.phoneNumber === 'string') {
-      return this.loginByCode(this.options.phoneNumber);
-    }
     this.urlCode = result.urlCode;
     this.attempt++;
 
@@ -225,21 +248,32 @@ export class HostLayer {
   }
 
   protected async loginByCode(phone: string) {
-    const code = await evaluateAndReturn(
+    await evaluateAndReturn(
       this.page,
       async ({ phone }) => {
-        return JSON.parse(
-          JSON.stringify(await WPP.conn.genLinkDeviceCodeForPhoneNumber(phone))
-        );
+        await WPP.conn.startLinkDeviceCodeForPhoneNumber(phone);
       },
       { phone }
     );
+  }
+
+  protected onLinkCode(code: string) {
     if (this.options.logQR) {
       this.log('info', `Waiting for Login By Code (Code: ${code})\n`);
     } else {
       this.log('verbose', `Waiting for Login By Code`);
     }
     this.catchLinkCode?.(code);
+  }
+
+  /**
+   * Refreshes the code for the active phone-number linking flow.
+   * @category Host
+   */
+  public async refreshLinkCode(): Promise<string> {
+    return await evaluateAndReturn(this.page, () =>
+      WPP.conn.refreshLinkDeviceCode()
+    );
   }
 
   protected async checkInChat() {
@@ -350,11 +384,23 @@ export class HostLayer {
   }
 
   public async waitForPageLoad() {
-    while (!this.isInjected) {
-      await sleep(200);
+    while (!this.page.isClosed()) {
+      const pageLoad = this.pageLoadPromise;
+
+      if (!pageLoad) {
+        await sleep(50);
+        continue;
+      }
+
+      await pageLoad;
+
+      if (pageLoad === this.pageLoadPromise && this.isInjected) {
+        await this.page.waitForFunction(() => WPP.isReady);
+        return;
+      }
     }
 
-    await this.page.waitForFunction(() => WPP.isReady).catch(() => {});
+    throw new Error('Page closed before WAPI injection completed');
   }
 
   public async waitForLogin() {
@@ -419,6 +465,7 @@ export class HostLayer {
         this.tryAutoClose();
         throw new Error('Phone not connected');
       }
+      await this.waitForPageLoad();
       this.cancelAutoClose();
       return true;
     }
@@ -492,6 +539,7 @@ export class HostLayer {
    * @category Host
    */
   public async isConnected() {
+    await this.waitForPageLoad();
     return await evaluateAndReturn(this.page, () => WAPI.isConnected());
   }
 
