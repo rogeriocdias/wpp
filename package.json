@@ -1,6 +1,6 @@
 {
   "name": "@wppconnect-team/wppconnect",
-  "version": "2.3.3",
+  "version": "2.3.4",
   "description": "WPPConnect is an open source project developed by the JavaScript community with the aim of exporting functions from WhatsApp Web to the node, which can be used to support the creation of any interaction, such as customer service, media sending, intelligence recognition based on phrases artificial and many other things, use your imagination... 😀🤔💭",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -8,9 +8,9 @@
     "build:client": "tsc",
     "build:wapi": "cd src/lib/wapi/ && webpack",
     "build": "npm run build:wapi && npm run build:client",
-    "changelog:last": "conventional-changelog -p angular -r 2",
-    "changelog:preview": "conventional-changelog -p angular -u",
-    "changelog:update": "conventional-changelog -p angular -i CHANGELOG.md -s",
+    "changelog:last": "conventional-changelog -n ./changelog.config.cjs -r 2",
+    "changelog:preview": "conventional-changelog -n ./changelog.config.cjs -u",
+    "changelog:update": "conventional-changelog -n ./changelog.config.cjs -i CHANGELOG.md -s",
     "clean": "shx rm -rf session dist",
     "example": "node ./examples/basic/index.js",
     "commit": "cz",
@@ -59,12 +59,12 @@
   ],
   "devDependencies": {
     "@babel/core": "^7.29.7",
-    "@babel/eslint-parser": "^7.29.7",
+    "@babel/eslint-parser": "^7.29.9",
     "@babel/eslint-plugin": "^7.29.7",
     "@babel/preset-env": "^7.29.7",
-    "@commitlint/cli": "^21.2.2",
-    "@commitlint/config-conventional": "^21.2.2",
-    "@commitlint/cz-commitlint": "^21.2.2",
+    "@commitlint/cli": "^21.2.3",
+    "@commitlint/config-conventional": "^21.2.3",
+    "@commitlint/cz-commitlint": "^21.2.3",
     "@eslint/js": "^10.0.1",
     "@tony.ganchev/eslint-plugin-header": "^3.4.4",
     "@types/atob": "^2.1.4",
@@ -83,7 +83,7 @@
     "eslint-plugin-prettier": "^5.5.6",
     "globals": "^17.12.0",
     "husky": "^9.1.7",
-    "mocha": "^11.8.0",
+    "mocha": "^12.0.3",
     "prettier": "^2.8.8",
     "pretty-quick": "^4.2.2",
     "regenerator-runtime": "^0.14.1",
@@ -97,7 +97,7 @@
     "webpack-cli": "^6.0.1"
   },
   "dependencies": {
-    "@wppconnect/wa-js": "^4.6.0",
+    "@wppconnect/wa-js": "^4.6.1",
     "@wppconnect/wa-version": "^1.5.4472",
     "atob": "^2.1.2",
     "axios": "^1.20.0",
@@ -119,17 +119,17 @@
     "reflect-metadata": "^0.2.1",
     "rimraf": "^3.0.2",
     "sanitize-filename": "^1.6.4",
-    "sharp": "0.35.4",
+    "sharp": "0.35.5",
     "tmp": "^0.2.7",
     "tree-kill": "^1.2.2",
     "winston": "^3.19.0",
     "ws": "^8.21.3"
   },
   "overrides": {
-    "serialize-javascript": "7.1.1"
+    "serialize-javascript": "7.1.2"
   },
   "optionalDependencies": {
-    "@img/sharp-win32-x64": "^0.35.4",
+    "@img/sharp-win32-x64": "^0.35.5",
     "fsevents": "^2.3.3"
   },
   "directories": {
